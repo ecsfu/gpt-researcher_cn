@@ -3,7 +3,7 @@
 
 <head>
     <title>GPT Researcher</title>
-    <meta name="description" content="A research assistant powered by GPT-4">
+    <meta name="description" content="大模型驱动的研究助手">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="./static/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,10 +49,10 @@
                     of Research</span>
             </h1>
             <p class="max-w-6xl mx-auto text-gray-600 mt-8" style="font-size:20px">
-                Say Hello to <b>GPT Researcher</b>, your AI mate for rapid insights and comprehensive research. <br>
-                GPT Researcher takes care of everything from accurate source gathering and organization of research results to generation of customized reports with citations.
+                向您的AI研究助手<b>GPT Researcher</b>说你好，它是您快速获取洞见和进行综合研究的人工智能伙伴。<br>
+                GPT Researcher 负责从准确的资料收集和研究结果的整理到带有引用的定制化报告生成的一切工作。
             </p>
-            <a href="#form" class="btn btn-primary">Get Started</a>
+            <a href="#form" class="btn btn-primary">快速开始</a>
         </div>
     </section>
 
@@ -60,7 +60,7 @@
         <div class="agent-item"><img src="/static/gptr-logo.png" class="avatar" alt="Auto Agent"></div>
         <form method="POST" class="mt-3" onsubmit="GPTResearcher.startResearch(); return false;">
             <div class="form-group">
-                <label for="task" class="agent-question">What would you like me to research next?</label>
+                <label for="task" class="agent-question">接下来您想让我研究什么？</label>
                 <input id="task" name="task" class="form-control" required></input>
                 <input type="radio" name="agent" id="autoAgent" value="Auto Agent" checked hidden>
             </div>
@@ -72,74 +72,59 @@
                 <button type="button" id="btnShowAuto" class="btn btn-secondary mt-3 btn-show">Auto Agent</button>
             </div>
             <div class="form-group">
-                <label for="report_type" class="agent-question">What type of report would you like me to
-                    generate?</label>
+                <label for="report_type" class="agent-question">您想生成什么类型的报告？</label>
                 <select name="report_type" class="form-control" required>
-                    <option value="research_report">Summary - Short and fast (~2 min)</option>
-                    <option value="detailed_report">Detailed - In depth and longer (~5 min)</option>
-                    <option value="resource_report">Resource Report</option>
+                    <option value="research_report">总结 - 短且快 (~2 min)</option>
+                    <option value="detailed_report">详细 - 深度且更久 (~5 min)</option>
+                    <option value="resource_report">资源报告</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="tone" class="agent-question">In which tone would you like the report to be
-                    generated?</label>
+                <label for="tone" class="agent-question">您希望报告以哪种语气生成？</label>
                 <select name="tone" id="tone" class="form-control" required>
-                    <option value="Objective">Objective - Impartial and unbiased presentation of facts and findings
+                    <option value="Objective">客观 - 对事实和研究结果进行公正且无偏见的呈现
                     </option>
-                    <option value="Formal">Formal - Adheres to academic standards with sophisticated language and
-                        structure</option>
-                    <option value="Analytical">Analytical - Critical evaluation and detailed examination of data and
-                        theories</option>
-                    <option value="Persuasive">Persuasive - Convincing the audience of a particular viewpoint or
-                        argument</option>
-                    <option value="Informative">Informative - Providing clear and comprehensive information on a topic
+                    <option value="Formal">正式 - 遵循学术标准，使用复杂精确的语言和结构</option>
+                    <option value="Analytical">分析性 - 对数据和理论进行批判性评估和详细考察</option>
+                    <option value="Persuasive">说服性 - 使读者信服于某一特定观点或论点</option>
+                    <option value="Informative">信息性 - 提供关于主题的清晰且全面的信息
                     </option>
-                    <option value="Explanatory">Explanatory - Clarifying complex concepts and processes</option>
-                    <option value="Descriptive">Descriptive - Detailed depiction of phenomena, experiments, or case
-                        studies</option>
-                    <option value="Critical">Critical - Judging the validity and relevance of the research and its
-                        conclusions</option>
-                    <option value="Comparative">Comparative - Juxtaposing different theories, data, or methods to
-                        highlight differences and similarities</option>
-                    <option value="Speculative">Speculative - Exploring hypotheses and potential implications or future
-                        research directions</option>
-                    <option value="Reflective">Reflective - Considering the research process and personal insights or
-                        experiences</option>
-                    <option value="Narrative">Narrative - Telling a story to illustrate research findings or
-                        methodologies</option>
-                    <option value="Humorous">Humorous - Light-hearted and engaging, usually to make the content more
-                        relatable</option>
-                    <option value="Optimistic">Optimistic - Highlighting positive findings and potential benefits
+                    <option value="Explanatory">解释性 - 澄清复杂的概念和过程</option>
+                    <option value="Descriptive">描述性 - 对现象、实验或案例研究进行详细的描绘</option>
+                    <option value="Critical">批判性 - 评判研究及其结论的有效性和相关性</option>
+                    <option value="Comparative">比较性 - 并置不同的理论、数据或方法以突出差异和相似之处</option>
+                    <option value="Speculative">推测性 - 探索假设及其潜在影响或未来研究方向</option>
+                    <option value="Reflective">反思性 - 考虑研究过程及个人见解或经验</option>
+                    <option value="Narrative">叙事性 - 讲述故事以说明研究发现或方法</option>
+                    <option value="Humorous">幽默性 - 轻松且引人入胜，通常是为了使内容更易关联</option>
+                    <option value="Optimistic">乐观性 - 突出积极的研究成果和潜在益处
                     </option>
-                    <option value="Pessimistic">Pessimistic - Focusing on limitations, challenges, or negative outcomes
+                    <option value="Pessimistic">悲观性 - 关注局限性、挑战或负面结果
                     </option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="report_source" class="agent-question">What sources would you like me to research
-                    from?</label>
-                <p class="text-left mt-0 pt-0" style="font-size: 0.7rem;">You can now do research on local documents as
-                    well. Please make sure to add the DOC_PATH env variable pointing to your documents folder.</p>
+                <label for="report_source" class="agent-question">您希望我从哪里获得数据源？</label>
+                <p class="text-left mt-0 pt-0" style="font-size: 0.7rem;">添加一个指向您文档文件夹的 DOC_PATH 环境变量，即可引入本地文档。</p>
                 <select name="report_source" class="form-control" required>
-                    <option value="web">The Web</option>
-                    <option value="local">My Documents</option>
-                    <option value="hybrid">Hybrid</option>
+                    <option value="web">网页</option>
+                    <option value="local">我的文档</option>
+                    <option value="hybrid">混合</option>
                 </select>
             </div>
-            <input type="submit" value="Research" class="btn btn-primary button-padding">
+            <input type="submit" value="开始研究" class="btn btn-primary button-padding">
         </form>
 
         <div class="margin-div">
-            <h2>Agent Output</h2>
-            <p class="mt-2 text-left" style="font-size: 0.8rem;">An agent tailored specifically to your task
-                will be generated to provide the most precise and relevant research results.</p>
+            <h2>代理输出</h2>
+            <p class="mt-2 text-left" style="font-size: 0.8rem;">将为您生成一个专门针对您任务的代理，以提供最精确和相关的研究结果。</p>
             <div id="output"></div>
         </div>
         <div class="images_div">
             <div id="selectedImagesContainer" style="display: none;"></div>
         </div>
         <div class="margin-div">
-            <h2>Research Report</h2>
+            <h2>研究报告</h2>
             <div id="reportContainer"></div>
             <div id="reportActions">
                 <div class="alert alert-info" role="alert" id="status"></div>
@@ -156,9 +141,9 @@
 
     <footer>
         <p>
-            <a target="_blank" href="https://gptr.dev">Homepage</a> |
-            <a target="_blank" href="https://github.com/assafelovic/gpt-researcher">GitHub</a> |
-            <a target="_blank" href="https://discord.gg/spBgZmm3Xe">Discord</a>
+<!--            <a target="_blank" href="https://gptr.dev">Homepage</a> |-->
+<!--            <a target="_blank" href="https://github.com/ecsfu/gpt-researcher_cn">GitHub</a> -->
+<!--            <a target="_blank" href="https://discord.gg/spBgZmm3Xe">Discord</a>-->
         </p>
         <p>GPT Researcher &copy; 2024</p>
     </footer>
