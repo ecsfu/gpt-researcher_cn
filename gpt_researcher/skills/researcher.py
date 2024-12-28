@@ -15,11 +15,11 @@ class ResearchConductor:
     def __init__(self, researcher):
         self.researcher = researcher
 
-    async def plan_research(self, query):
+    async def plan_research(self, query): #搜索网络
         await stream_output(
             "logs",
             "planning_research",
-            f"🌐 Browsing the web to learn more about the task: {query}...",
+            f"🌐 为以下问题进行网络搜索: {query}...",
             self.researcher.websocket,
         )
 
@@ -28,11 +28,11 @@ class ResearchConductor:
         await stream_output(
             "logs",
             "planning_research",
-            f"🤔 Planning the research strategy and subtasks (this may take a minute)...",
+            f"🤔 开始生成研究策略和子问题 (可能会花费几分钟的时间)...",
             self.researcher.websocket,
         )
 
-        return await plan_research_outline(
+        return await plan_research_outline(  #返回子问题
             query=query,
             search_results=search_results,
             agent_role_prompt=self.researcher.role,
@@ -54,7 +54,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "starting_research",
-                f"🔍 Starting the research task for '{self.researcher.query}'...",
+                f"🔍 开始研究任务： '{self.researcher.query}'...",
                 self.researcher.websocket,
             )
 
@@ -70,7 +70,7 @@ class ResearchConductor:
                 await stream_output(
                     "logs",
                     "answering_from_memory",
-                    f"🧐 I was unable to find relevant context in the provided sources...",
+                    f"🧐 无法从提供的数据源中找到相关信息...",
                     self.websocket,
                 )
             # If complement_source_urls parameter is set, more resources can be gathered to create additional context using default web search
@@ -92,7 +92,7 @@ class ResearchConductor:
                 self.researcher.vector_store.load(document_data)
             docs_context = await self._get_context_by_web_search(self.researcher.query, document_data)
             web_context = await self._get_context_by_web_search(self.researcher.query)
-            research_data = f"Context from local documents: {docs_context}\n\nContext from web sources: {web_context}"
+            research_data = f"来自本地文档中的内容: {docs_context}\n\n来自网页的内容: {web_context}"
 
         elif self.researcher.report_source == ReportSource.LangChainDocuments.value:
             langchain_documents_data = await LangChainDocumentLoader(
@@ -134,7 +134,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "source_urls",
-                f"🗂️ I will conduct my research based on the following urls: {new_search_urls}...",
+                f"🗂️ 开始从以下链接获取信息: {new_search_urls}...",
                 self.researcher.websocket,
             )
 
@@ -193,7 +193,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "subqueries",
-                f"🗂️ I will conduct my research based on the following queries: {sub_queries}...",
+                f"🗂️ 我将基于下面的子问题开展研究: {sub_queries}...",
                 self.researcher.websocket,
                 True,
                 sub_queries,
@@ -291,7 +291,7 @@ class ResearchConductor:
                     await stream_output(
                         "logs",
                         "added_source_url",
-                        f"✅ Added source url to research: {url}\n",
+                        f"✅ 加入以下研究链接: {url}\n",
                         self.researcher.websocket,
                         True,
                         url,

@@ -32,21 +32,20 @@ def generate_search_queries_prompt(
         task = question
 
     context_prompt = f"""
-You are a seasoned research assistant tasked with generating search queries to find relevant information for the following task: "{task}".
+你是一位经验丰富的研究助理，你的任务是为以下研究生成搜索查询，以找到相关的信息: "{task}".
 Context: {context}
 
-Use this context to inform and refine your search queries. The context provides real-time web information that can help you generate more specific and relevant queries. Consider any current events, recent developments, or specific details mentioned in the context that could enhance the search queries.
+请使用Context中的信息优化你的搜索查询。该上下文提供了实时的网络信息，可以帮助你生成更加具体和相关的查询。考虑上下文中提到的任何当前事件、最新发展或特定细节，这些都可以增强您的搜索查询。
 """ if context else ""
 
     dynamic_example = ", ".join([f'"query {i+1}"' for i in range(max_iterations)])
 
-    return f"""Write {max_iterations} google search queries to search online that form an objective opinion from the following task: "{task}"
+    return f"""编写 {max_iterations} 个谷歌搜索查询用于在线搜索，以形成关于以下任务的客观意见：“{task}”
 
-Assume the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')} if required.
+如果需要，假设当前日期是 {datetime.now(timezone.utc).strftime('%Y-%m-%d')}。
 
 {context_prompt}
-You must respond with a list of strings in the following format: [{dynamic_example}].
-The response should contain ONLY the list.
+你的回答必须只包含一个列表，格式如下：[{dynamic_example}]。
 """
 
 
@@ -67,74 +66,75 @@ def generate_report_prompt(
     reference_prompt = ""
     if report_source == ReportSource.Web.value:
         reference_prompt = f"""
-You MUST write all used source urls at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each.
-Every url should be hyperlinked: [url website](url)
-Additionally, you MUST include hyperlinks to the relevant URLs wherever they are referenced in the report: 
+你必须在报告结尾处写出所有使用的来源网址作为参考，并确保不添加重复的来源，每个来源仅列出一次。
+每个网址都应该是超链接格式：[网址名称](网址)
+此外，你必须在报告中提及相关网址的地方包含超链接：
 
-eg: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
+例如：作者, A. A. (年, 月 日). 网页标题. 网站名称. [网址名称](网址)
 """
     else:
         reference_prompt = f"""
-You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
+你必须在报告结尾处写出所有使用过的来源文档名称作为参考，并确保不添加重复的来源，每个来源仅列出一次。
 """
 
-    tone_prompt = f"Write the report in a {tone.value} tone." if tone else ""
+    tone_prompt = f"请以{tone.value} 的语气攥写报告" if tone else ""
 
     return f"""
-Information: "{context}"
+信息: "{context}"
 ---
-Using the above information, answer the following query or task: "{question}" in a detailed report --
-The report should focus on the answer to the query, should be well structured, informative, 
-in-depth, and comprehensive, with facts and numbers if available and at least {total_words} words.
-You should strive to write the report as long as you can using all relevant and necessary information provided.
+使用上述信息，回答以下查询或任务： "{question}" 并撰写一份详细的报告 --
+报告应集中于对查询的回答，结构合理、内容丰富、深入且全面，尽可能提供事实和数据，至少{total_words}字。
+您应尽量使报告尽可能长，同时使用所有相关和必要的信息。
 
-Please follow all of the following guidelines in your report:
-- You MUST determine your own concrete and valid opinion based on the given information. Do NOT defer to general and meaningless conclusions.
-- You MUST write the report with markdown syntax and {report_format} format.
-- You MUST prioritize the relevance, reliability, and significance of the sources you use. Choose trusted sources over less reliable ones.
-- You must also prioritize new articles over older articles if the source can be trusted.
-- Use in-text citation references in {report_format} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
-- Don't forget to add a reference list at the end of the report in {report_format} format and full url links without hyperlinks.
+请在报告中遵循以下所有指南：
+- 您必须基于给定的信息确定自己具体且有效的意见。不要得出一般性和无意义的结论。
+- 您必须以Markdown语法和{report_format}格式撰写报告。
+- 您必须优先考虑所用来源的相关性、可靠性和重要性。选择可信的来源而非不太可靠的来源。
+- 如果来源可信，优先选用新文章而非旧文章。
+- 使用{report_format}格式中的文中引用参考，并在引用它们的句子或段落末尾放置Markdown超链接，如：([文中引用](网址))。
+- 别忘了在报告结尾添加一个参考列表，采用{report_format}格式，并附上完整的网址链接（无需超链接）。
 - {reference_prompt}
 - {tone_prompt}
 
-Please do your best, this is very important to my career.
-Assume that the current date is {date.today()}.
+请尽最大努力，这对我的职业生涯非常重要。
+假设当前日期是 {date.today()}。
 """
 
 def curate_sources(query, sources, max_results=10):
-    return f"""Your goal is to evaluate and curate the provided scraped content for the research task: "{query}" 
-    while prioritizing the inclusion of relevant and high-quality information, especially sources containing statistics, numbers, or concrete data.
+    return f"""目标：
+您的目标是评估和整理提供的爬取内容，以完成研究任务：“{query}”，并优先保留相关且高质量的信息，尤其是包含统计数据、数字或具体数据的来源。
 
-The final curated list will be used as context for creating a research report, so prioritize:
-- Retaining as much original information as possible, with extra emphasis on sources featuring quantitative data or unique insights
-- Including a wide range of perspectives and insights
-- Filtering out only clearly irrelevant or unusable content
+最终整理结果将用作研究报告的背景信息，因此请优先：
 
-EVALUATION GUIDELINES:
-1. Assess each source based on:
-   - **Relevance**: Include sources directly or partially connected to the research query. Err on the side of inclusion.
-   - **Credibility**: Favor authoritative sources but retain others unless clearly untrustworthy.
-   - **Currency**: Prefer recent information unless older data is essential or valuable.
-   - **Objectivity**: Retain sources with bias if they provide a unique or complementary perspective.
-   - **Quantitative Value**: Give higher priority to sources with statistics, numbers, or other concrete data.
+- 尽量保留原始信息，特别是带有定量数据或独特见解的内容。
+- 包括广泛的视角和见解。
+- 仅过滤掉显然不相关或无法使用的内容。
 
-2. Source Selection:
-   - Include as many relevant sources as possible, up to {max_results}, focusing on broad coverage and diversity.
-   - Prioritize sources with statistics, numerical data, or verifiable facts.
-   - Overlapping content is acceptable if it adds depth, especially when data is involved.
-   - Exclude sources only if they are entirely irrelevant, severely outdated, or unusable due to poor content quality.
+评估指南：
+1.评估每个来源时需考虑：
+- 相关性：包括直接或部分与研究任务相关的来源，尽量多保留。
+- 可信度：优先考虑权威来源，但除非显然不可信，否则保留其他来源。
+- 时效性：优先使用最新信息，但如果旧数据重要或有价值也可保留。
+- 客观性：如果有偏见的来源提供了独特或补充性视角，也应保留。
+- 定量价值：优先包含带有统计数据、数字或其他具体数据的来源。
 
-3. Content Retention:
-   - DO NOT rewrite, summarize, or condense any source content.
-   - Retain all usable information, cleaning up only clear garbage or formatting issues.
-   - Keep marginally relevant or incomplete sources if they contain valuable data or insights.
+2.来源选择：
+- 尽可能包括多的相关来源（最多{max_results}个），以确保广泛覆盖和多样性。
+- 优先选择包含统计、数值数据或可验证事实的来源。
+- 内容重复是可以接受的，尤其是数据内容的深度分析。
+- 仅当来源完全不相关、严重过时或内容质量过低时，才将其排除。
 
-SOURCES LIST TO EVALUATE:
+3.内容保留：
+- 禁止重写、总结或压缩任何来源内容。
+- 保留所有可用信息，仅清理明显的垃圾或格式问题。
+- 如果来源中含有有价值的数据或见解，即使只与任务部分相关或不完整，也应保留。
+
+来源列表评估：
+请在以下提供的来源列表中进行筛选：
 {sources}
 
-You MUST return your response in the EXACT sources JSON list format as the original sources.
-The response MUST not contain any markdown format or additional text (like ```json), just the JSON list!
+您必须按照原始 JSON 列表格式返回您的响应，与原始来源的 JSON 格式完全一致。
+响应中不能包含任何 Markdown 格式或额外的文本（如 ```json）。请仅返回 JSON 列表！
 """
 
 
@@ -156,25 +156,23 @@ def generate_resource_report_prompt(
     reference_prompt = ""
     if report_source == ReportSource.Web.value:
         reference_prompt = f"""
-            You MUST include all relevant source urls.
-            Every url should be hyperlinked: [url website](url)
+            你必须包含所有相关来源的网址。 每个网址应使用超链接格式：[网址名称](网址)。
             """
     else:
         reference_prompt = f"""
-            You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
+            你必须在报告末尾列出所有使用过的来源文档名称作为参考，并确保不要添加重复的来源，每个来源仅列出一次。 "
         """
 
     return (
-        f'"""{context}"""\n\nBased on the above information, generate a bibliography recommendation report for the following'
-        f' question or topic: "{question}". The report should provide a detailed analysis of each recommended resource,'
-        " explaining how each source can contribute to finding answers to the research question.\n"
-        "Focus on the relevance, reliability, and significance of each source.\n"
-        "Ensure that the report is well-structured, informative, in-depth, and follows Markdown syntax.\n"
-        "Include relevant facts, figures, and numbers whenever available.\n"
-        f"The report should have a minimum length of {total_words} words.\n"
-        "You MUST include all relevant source urls."
-        "Every url should be hyperlinked: [url website](url)"
-        f"{reference_prompt}"
+        f'"""{context}"""\n\n基于上述信息，为以下问题或主题生成一份参考资料推荐报告："{question}"。 ' 
+        "报告应提供每个推荐资源的详细分析，解释每个来源如何帮助回答研究问题。  "
+        "重点关注每个来源的相关性、可靠性和重要性。"
+        "确保报告结构清晰、内容翔实且深入，并遵循 Markdown 语法。"
+        "尽可能包括相关事实、数据和数字。"
+        f"报告的最小长度应为 {total_words} 字。"
+        "你必须包含所有相关来源的网址。"
+        "每个网址应使用超链接格式：[网址名称](网址)。"
+        f'{reference_prompt}'
     )
 
 
@@ -194,11 +192,9 @@ def generate_outline_report_prompt(
     """
 
     return (
-        f'"""{context}""" Using the above information, generate an outline for a research report in Markdown syntax'
-        f' for the following question or topic: "{question}". The outline should provide a well-structured framework'
-        " for the research report, including the main sections, subsections, and key points to be covered."
-        f" The research report should be detailed, informative, in-depth, and a minimum of {total_words} words."
-        " Use appropriate Markdown syntax to format the outline and ensure readability."
+        f'"""{context}""" 使用以上信息，为以下问题或主题生成一份研究报告的大纲（采用Markdown语法）'
+        f' : "{question}". 该大纲应提供一份结构良好的框架，包括研究报告的主要章节、子章节，以及需要涵盖的关键点。'
+        f" 研究报告应详细、信息丰富、深入，并且至少包含 {total_words} 个单词。使用适当的Markdown语法来格式化大纲，并确保其可读性。"
     )
 
 
@@ -215,28 +211,28 @@ def get_report_by_type(report_type: str):
 
 def auto_agent_instructions():
     return """
-This task involves researching a given topic, regardless of its complexity or the availability of a definitive answer. The research is conducted by a specific server, defined by its type and role, with each server requiring distinct instructions.
-Agent
-The server is determined by the field of the topic and the specific name of the server that could be utilized to research the topic provided. Agents are categorized by their area of expertise, and each server type is associated with a corresponding emoji.
+这个任务涉及对给定主题进行研究，无论其复杂性或是否存在明确答案。研究由特定类型和角色的服务完成，每种服务需要不同的指令。
+代理（Agent）
+服务的选择基于主题领域和可以用来研究该主题的具体服务名称。代理根据其专业领域分类，每种服务类型都与一个对应的表情符号相关联。
 
-examples:
-task: "should I invest in apple stocks?"
-response: 
+示例：
+任务: “我应该投资苹果股票吗？”
+响应: 
 {
-    "server": "💰 Finance Agent",
-    "agent_role_prompt: "You are a seasoned finance analyst AI assistant. Your primary goal is to compose comprehensive, astute, impartial, and methodically arranged financial reports based on provided data and trends."
+    "server": "💰 财务代理",
+    "agent_role_prompt": "你是一名经验丰富的财务分析AI助手。你的主要目标是基于提供的数据和趋势，撰写全面、深刻、公正且方法论严谨的财务报告。"
 }
-task: "could reselling sneakers become profitable?"
-response: 
+任务: “倒卖运动鞋会变得有利可图吗？”
+响应: 
 { 
-    "server":  "📈 Business Analyst Agent",
-    "agent_role_prompt": "You are an experienced AI business analyst assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured business reports based on provided business data, market trends, and strategic analysis."
+    "server":  "📈 商业分析代理",
+    "agent_role_prompt": "你是一名经验丰富的AI商业分析助手。你的主要目标是基于提供的商业数据、市场趋势和战略分析，生成全面、深刻、公正且系统化的商业报告。"
 }
-task: "what are the most interesting sites in Tel Aviv?"
-response:
+任务: “特拉维夫有哪些最有趣的景点？”
+响应:
 {
-    "server:  "🌍 Travel Agent",
-    "agent_role_prompt": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights."
+    "server":  "🌍 旅行代理",
+    "agent_role_prompt": "你是一名见多识广的AI旅行助手。你的主要目的是针对给定地点撰写有趣、深刻、公正且结构良好的旅行报告，包括历史、景点和文化见解。"
 }
 """
 
@@ -249,9 +245,7 @@ def generate_summary_prompt(query, data):
     """
 
     return (
-        f'{data}\n Using the above text, summarize it based on the following task or query: "{query}".\n If the '
-        f"query cannot be answered using the text, YOU MUST summarize the text in short.\n Include all factual "
-        f"information such as numbers, stats, quotes, etc if available. "
+        f'{data}\n 使用上述文本，基于以下任务或查询总结内容：“{query}”。如果无法使用文本回答查询，你必须对文本进行简要总结。包括所有可用的事实性信息，例如数字、统计数据、引言等。'
     )
 
 
@@ -262,23 +256,24 @@ def generate_summary_prompt(query, data):
 
 def generate_subtopics_prompt() -> str:
     return """
-Provided the main topic:
+在提供的主要主题：
 
 {task}
 
-and research data:
+和研究数据：
 
 {data}
 
-- Construct a list of subtopics which indicate the headers of a report document to be generated on the task. 
-- These are a possible list of subtopics : {subtopics}.
-- There should NOT be any duplicate subtopics.
-- Limit the number of subtopics to a maximum of {max_subtopics}
-- Finally order the subtopics by their tasks, in a relevant and meaningful order which is presentable in a detailed report
+的基础上：
 
-"IMPORTANT!":
-- Every subtopic MUST be relevant to the main topic and provided research data ONLY!
+构建一个子主题列表，这些子主题将作为任务报告文档的标题。
+以下是可能的子主题列表：{subtopics}。
+子主题之间不能有重复内容。
+子主题数量限制为最多 {max_subtopics} 个。
+最后按照任务的相关性和意义对子主题进行排序，使其呈现为详细报告中合理且可展示的顺序。
+“重要！”
 
+每个子主题必须仅与主要主题和提供的研究数据相关！
 {format_instructions}
 """
 
@@ -295,65 +290,65 @@ def generate_subtopic_report_prompt(
     tone: Tone = Tone.Objective,
 ) -> str:
     return f"""
-Context:
+上下文：
 "{context}"
 
-Main Topic and Subtopic:
-Using the latest information available, construct a detailed report on the subtopic: {current_subtopic} under the main topic: {main_topic}.
-You must limit the number of subsections to a maximum of {max_subsections}.
+主要主题和子主题：
+基于最新可用信息，围绕主主题：{main_topic} 下的子主题：{current_subtopic}，构建一个详细报告。  
+子章节的数量必须限制在最多 {max_subsections} 个。
 
-Content Focus:
-- The report should focus on answering the question, be well-structured, informative, in-depth, and include facts and numbers if available.
-- Use markdown syntax and follow the {report_format.upper()} format.
+内容重点：
+- 报告应专注于回答问题，结构良好、信息丰富、深入且包含事实和数字（如有）。  
+- 使用 Markdown 语法并遵循 {report_format.upper()} 格式。
 
-IMPORTANT:Content and Sections Uniqueness:
-- This part of the instructions is crucial to ensure the content is unique and does not overlap with existing reports.
-- Carefully review the existing headers and existing written contents provided below before writing any new subsections.
-- Prevent any content that is already covered in the existing written contents.
-- Do not use any of the existing headers as the new subsection headers.
-- Do not repeat any information already covered in the existing written contents or closely related variations to avoid duplicates.
-- If you have nested subsections, ensure they are unique and not covered in the existing written contents.
-- Ensure that your content is entirely new and does not overlap with any information already covered in the previous subtopic reports.
+重要说明：内容和章节的独特性：
+- 确保内容独特且不与现有报告重复是至关重要的一部分。  
+- 在撰写任何新子章节之前，请仔细检查以下提供的现有标题和已有内容。  
+- 防止新内容与现有内容重复或有过于相似的变体，以避免重复。  
+- 新的子章节标题不得使用现有标题。  
+- 避免重复现有内容或已有子主题报告的相关变体。  
+- 如果添加嵌套子章节，确保它们的内容独特，且未包含在现有子主题报告中。  
+- 确保内容完全新颖且不与之前的子主题报告的任何信息重叠。
 
-"Existing Subtopic Reports":
-- Existing subtopic reports and their section headers:
+"现有子主题报告":
+- 现有子主题报告及其章节标题：
 
     {existing_headers}
 
-- Existing written contents from previous subtopic reports:
+- 来自之前子主题报告的现有内容：
 
     {relevant_written_contents}
 
-"Structure and Formatting":
-- As this sub-report will be part of a larger report, include only the main body divided into suitable subtopics without any introduction or conclusion section.
+"结构和格式要求":
+- 由于此子报告将作为更大报告的一部分，请仅包括主体内容，分为适当的子主题部分，不需要任何引言或结论部分。  
 
-- You MUST include markdown hyperlinks to relevant source URLs wherever referenced in the report, for example:
+- 必须使用 Markdown 超链接将报告中引用的相关来源 URL 关联，例如：
 
-    ### Section Header
-    
-    This is a sample text. ([url website](url))
+    ### 部分标题
 
-- Use H2 for the main subtopic header (##) and H3 for subsections (###).
-- Use smaller Markdown headers (e.g., H2 or H3) for content structure, avoiding the largest header (H1) as it will be used for the larger report's heading.
-- Organize your content into distinct sections that complement but do not overlap with existing reports.
-- When adding similar or identical subsections to your report, you should clearly indicate the differences between and the new content and the existing written content from previous subtopic reports. For example:
+    这是示例文本。([url 网站](url))
 
-    ### New header (similar to existing header)
+- 使用 H2 标题（##）作为主要子主题标题，H3 标题（###）作为子章节标题。  
+- 使用较小的 Markdown 标题（例如 H2 或 H3）进行内容结构化，避免使用最大的标题（H1），因为它将用于整个报告的标题。  
+- 将内容组织成独立的章节，使其补充但不与现有报告重复。  
+- 当向报告添加类似或相同的子章节时，必须明确指出新内容与现有内容之间的区别。例如：
 
-    While the previous section discussed [topic A], this section will explore [topic B]."
+    ### 新标题（与现有标题类似）
 
-"Date":
-Assume the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')} if required.
+    虽然上一部分讨论了[主题 A]，但本节将探讨[主题 B]。
 
-"IMPORTANT!":
-- The focus MUST be on the main topic! You MUST Leave out any information un-related to it!
-- Must NOT have any introduction, conclusion, summary or reference section.
-- You MUST include hyperlinks with markdown syntax ([url website](url)) related to the sentences wherever necessary.
-- You MUST mention the difference between the existing content and the new content in the report if you are adding the similar or same subsections wherever necessary.
-- The report should have a minimum length of {total_words} words.
-- Use an {tone.value} tone throughout the report.
+"日期":
+如有必要，请假设当前日期为 {datetime.now(timezone.utc).strftime('%Y-%m-%d')}。
 
-Do NOT add a conclusion section.
+"重要提示！":
+- 内容必须聚焦于主要主题！必须排除任何无关信息！  
+- 不得添加任何引言、结论、摘要或参考文献部分。  
+- 必须使用 Markdown 语法超链接 ([url 网站](url)) 到相关句子中的必要位置。  
+- 如果添加了类似或相同的子章节，必须在报告中明确提及新内容与现有内容之间的区别。  
+- 报告的最小字数必须为 {total_words}。  
+- 整个报告应保持 {tone.value} 的语气。
+
+不得添加结论部分。
 """
 
 
@@ -364,41 +359,38 @@ def generate_draft_titles_prompt(
     max_subsections: int = 5
 ) -> str:
     return f"""
-"Context":
-"{context}"
 
-"Main Topic and Subtopic":
-Using the latest information available, construct a draft section title headers for a detailed report on the subtopic: {current_subtopic} under the main topic: {main_topic}.
+基于最新的可用信息，围绕主主题：{main_topic} 下的子主题：{current_subtopic}，构建一份详细报告的草稿章节标题。
 
-"Task":
-1. Create a list of draft section title headers for the subtopic report.
-2. Each header should be concise and relevant to the subtopic.
-3. The header should't be too high level, but detailed enough to cover the main aspects of the subtopic.
-4. Use markdown syntax for the headers, using H3 (###) as H1 and H2 will be used for the larger report's heading.
-5. Ensure the headers cover main aspects of the subtopic.
+"任务"：
+1. 创建子主题报告的草稿章节标题列表。
+2. 每个标题应简洁且与子主题相关。
+3. 标题不应过于笼统，而是足够详细地涵盖子主题的主要方面。
+4. 使用 Markdown 语法书写标题，使用 H3 (###)，因为 H1 和 H2 将用于更大报告的标题。
+5. 确保标题涵盖子主题的主要方面。
 
-"Structure and Formatting":
-Provide the draft headers in a list format using markdown syntax, for example:
+"结构与格式要求"：
+以列表格式提供草稿标题，使用 Markdown 语法，例如：
 
-### Header 1
-### Header 2
-### Header 3
+### 标题 1  
+### 标题 2  
+### 标题 3  
 
-"IMPORTANT!":
-- The focus MUST be on the main topic! You MUST Leave out any information un-related to it!
-- Must NOT have any introduction, conclusion, summary or reference section.
-- Focus solely on creating headers, not content.
+"重要提示！"：
+- 必须聚焦于主要主题！必须排除任何无关信息！  
+- 不得添加任何引言、结论、摘要或参考文献部分。  
+- 专注于创建标题，而不是内容。
 """
 
 
 def generate_report_introduction(question: str, research_summary: str = "") -> str:
     return f"""{research_summary}\n 
-Using the above latest information, Prepare a detailed report introduction on the topic -- {question}.
-- The introduction should be succinct, well-structured, informative with markdown syntax.
-- As this introduction will be part of a larger report, do NOT include any other sections, which are generally present in a report.
-- The introduction should be preceded by an H1 heading with a suitable topic for the entire report.
-- You must include hyperlinks with markdown syntax ([url website](url)) related to the sentences wherever necessary.
-Assume that the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')} if required.
+基于以上最新信息，准备一个关于主题“{question}”的详细报告引言。
+- 引言应简洁、结构良好、信息丰富，并使用 Markdown 语法。
+- 由于该引言将成为更大报告的一部分，请勿包含报告中通常存在的其他部分。
+- 引言前应以 H1 标题呈现，并提供适合整份报告的主题标题。
+- 必须在必要时为句子添加相关的 Markdown 格式超链接（[url website](url)）。
+如有需要，假定当前日期为 {datetime.now(timezone.utc).strftime('%Y-%m-%d')}。
 """
 
 
@@ -413,22 +405,22 @@ def generate_report_conclusion(query: str, report_content: str) -> str:
         str: A concise conclusion summarizing the report's main findings and implications.
     """
     prompt = f"""
-    Based on the research report below and research task, please write a concise conclusion that summarizes the main findings and their implications:
-    
-    Research task: {query}
-    
-    Research Report: {report_content}
+    根据以下研究报告和研究任务，请撰写一份简明的结论，总结主要发现及其影响：
 
-    Your conclusion should:
-    1. Recap the main points of the research
-    2. Highlight the most important findings
-    3. Discuss any implications or next steps
-    4. Be approximately 2-3 paragraphs long
+    研究任务：{query}
     
-    If there is no "## Conclusion" section title written at the end of the report, please add it to the top of your conclusion. 
-    You must include hyperlinks with markdown syntax ([url website](url)) related to the sentences wherever necessary.
+    研究报告：{report_content}
     
-    Write the conclusion:
+    您的结论应包含：
+    
+    1.概括研究的主要要点
+    2.突出最重要的发现
+    3.讨论任何相关影响或后续步骤
+    4.长度为大约 2-3 段
+    5.如果报告末尾没有标注“## 结论”作为结论部分标题，请在您的结论顶部添加该标题。
+    6.您必须在必要时为句子添加相关的 Markdown 格式超链接([url website](url))。
+    
+    撰写结论：
     """
 
     return prompt

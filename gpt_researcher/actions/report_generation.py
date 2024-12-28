@@ -231,10 +231,11 @@ async def generate_report(
     else:
         content = f"{generate_prompt(query, context, report_source, report_format=cfg.report_format, tone=tone, total_words=cfg.total_words)}"
     try:
+        print(f'-----{content}--||{agent_role_prompt}--')
         report = await create_chat_completion(
             model=cfg.smart_llm_model,
             messages=[
-                {"role": "system", "content": f"{agent_role_prompt}"},
+                # {"role": "system", "content": f"{agent_role_prompt}"},
                 {"role": "user", "content": content},
             ],
             temperature=0.35,

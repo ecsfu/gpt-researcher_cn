@@ -50,7 +50,7 @@ class ContextCompressor:
         pipeline_compressor = DocumentCompressorPipeline(
             transformers=[splitter, relevance_filter]
         )
-        base_retriever = SearchAPIRetriever(
+        base_retriever = SearchAPIRetriever( #内容、题目、链接
             pages=self.documents
         )
         contextual_retriever = ContextualCompressionRetriever(

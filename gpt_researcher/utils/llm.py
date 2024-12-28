@@ -44,6 +44,7 @@ async def create_chat_completion(
         str: The response from the chat completion
     """
     # validate input
+
     if model is None:
         raise ValueError("Model cannot be None")
     if max_tokens is not None and max_tokens > 16001:

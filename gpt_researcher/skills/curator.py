@@ -33,7 +33,7 @@ class SourceCurator:
             await stream_output(
                 "logs",
                 "research_plan",
-                f"⚖️ Evaluating and curating sources by credibility and relevance...",
+                f"⚖️ 根据可信度和相关性评估和精选数据源...",
                 self.researcher.websocket,
             )
 

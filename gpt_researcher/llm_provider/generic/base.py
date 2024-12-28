@@ -113,6 +113,7 @@ class GenericLLMProvider:
     async def get_chat_response(self, messages, stream, websocket=None):
         if not stream:
             # Getting output from the model chain using ainvoke for asynchronous invoking
+
             output = await self.llm.ainvoke(messages)
 
             return output.content
